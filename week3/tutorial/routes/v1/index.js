@@ -1,8 +1,10 @@
 const express = require('express');
-const userRoutes = require("../v1/user.routes");
+const ageRoutes = require("./age.routes");
+const dinosaursRoutes = require("./dinosaurs.routes");
 
 const router = express.Router();
 
-router.use('/user', userRoutes);
+router.use('/age', ageRoutes);
+router.use('/dinosaurs', dinosaursRoutes);
 
 module.exports = router;
