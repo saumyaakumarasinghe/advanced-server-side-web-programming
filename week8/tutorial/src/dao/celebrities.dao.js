@@ -1,7 +1,7 @@
 const db = require("../database/connection");
 
 const CelebrityDao = {
-    getAllCelebritiesList: () => {
+    getAllCelebrities: () => {
         return new Promise((resolve, reject) => {
             db.all("SELECT name FROM celebrities", [], (err, rows) => {
                 if (err) reject(err);
@@ -12,21 +12,25 @@ const CelebrityDao = {
 
     getCelebrityByName: (name) => {
         return new Promise((resolve, reject) => {
-            db.get("SELECT * FROM celebrities WHERE LOWER(name) = ?", [name.toLowerCase()], (err, row) => {
-                if (err) reject(err);
-                else resolve(row);
-            });
+            db.get(
+                "SELECT * FROM celebrities WHERE LOWER(name) = ?",
+                [name.toLowerCase()],
+                (err, row) => {
+                    if (err) reject(err);
+                    else resolve(row);
+              }
+          );
         });
     },
 
-    addCelebrity: (name, image, bio) => {
+    addCelebrity: (name, image, bio, age, films) => {
         return new Promise((resolve, reject) => {
             db.run(
-                "INSERT INTO celebrities (name, image, bio) VALUES (?, ?, ?)",
-                [name, image, bio],
+                "INSERT INTO celebrities (name, image, bio, age, films) VALUES (?, ?, ?, ?, ?)",
+                [name, image, bio, age, JSON.stringify(films)],
                 function (err) {
                     if (err) reject(err);
-                    else resolve({ id: this.lastID, name, image, bio });
+                    else resolve({ id: this.lastID, name, image, bio, age, films });
                 }
             );
         });

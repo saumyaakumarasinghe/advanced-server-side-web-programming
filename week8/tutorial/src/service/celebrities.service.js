@@ -3,7 +3,7 @@ const CelebrityDao = require("../dao/celebrities.dao");
 const CelebrityService = {
     celebritiesList: async (req, res) => {
     try {
-        const names = await CelebrityDao.getAllCelebritiesList();
+        const names = await CelebrityDao.getAllCelebrities();
         res.json(names);
     } catch (error) {
         res.status(500).json({ error: "Failed to fetch celebrity names." });
@@ -18,7 +18,15 @@ const CelebrityService = {
         const celebrity = await CelebrityDao.getCelebrityByName(name);
         if (!celebrity) return res.status(404).json({ error: "Celebrity not found." });
 
-        res.json(celebrity);
+        const topFilms = JSON.parse(celebrity.films);
+
+        res.json({
+            name: celebrity.name,
+            age: celebrity.age,
+            image: celebrity.image,
+            bio: celebrity.bio,
+            films: topFilms
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -26,12 +34,12 @@ const CelebrityService = {
 
     addCelebrity: async (req, res) => {
         try {
-            const { name, image, bio } = req.body;
-            if (!name || !image || !bio) {
-                return res.status(400).json({ error: "All fields (name, image, bio) are required." });
+            const { name, image, bio, age, films } = req.body;
+            if (!name || !image || !bio || !age || !films) {
+                return res.status(400).json({ error: "All fields (name, image, bio, age, films) are required." });
             }
 
-            const newCelebrity = await CelebrityDao.addCelebrity(name, image, bio);
+            const newCelebrity = await CelebrityDao.addCelebrity(name, image, bio, age, films);
             res.status(201).json(newCelebrity);
     } catch (error) {
         res.status(500).json({ error: error.message });

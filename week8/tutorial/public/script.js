@@ -20,15 +20,36 @@ $(document).ready(function () {
             return;
         }
 
+        // Show loading spinner before making the request
+        $("#loadingSpinner").show();
+        $("#results").empty(); // Clear previous results
+
         // Fetch celebrity details
         $.get(`/celebrities/search?name=${encodeURIComponent(name)}`, function (data) {
+            // Hide the loading spinner once the data is received
+            $("#loadingSpinner").hide();
+
+            // Create the HTML to display celebrity info
+            let filmsList = "<ul>";
+            data.films.forEach(film => {
+                filmsList += `<li>${film}</li>`;
+            });
+            filmsList += "</ul>";
+
+            // Display the result
             $("#results").html(`
-                <h3>${data.name}</h3>
+                <h3>${data.name} (${data.age} years old)</h3>
                 <img src="${data.image}" alt="${data.name}" width="150">
                 <p>${data.bio}</p>
+                <h4>Top 3 Films:</h4>
+                ${filmsList}
             `);
         }).fail(function () {
-            $("#results").html(`<p style="color: red;">Celebrity not found!</p>`);
+            // Hide the loading spinner if there's an error
+            $("#loadingSpinner").hide();
+
+            // Display an error message
+            $("#results").html(`<p style="color: red;">Celebrity not found or an error occurred. Please try again.</p>`);
         });
     });
 });
