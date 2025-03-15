@@ -1,46 +1,34 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const celebrityNameInput = document.getElementById("celebrityName");
-    const celebrityDropdown = document.getElementById("celebrityDropdown");
-    const submitBtn = document.getElementById("submitBtn");
-    const resultsDiv = document.getElementById("results");
+$(document).ready(function () {
+    // Fetch and populate the dropdown on page load
+    $.get("/celebrities", function (data) {
+        data.forEach(name => {
+            $("#celebrityDropdown").append(`<option value="${name}">${name}</option>`);
+        });
+    });
 
-    // Load celebrity names into the dropdown
-    fetch("/api/celebrities")
-        .then(response => response.json())
-        .then(data => {
-            data.forEach(name => {
-                const option = document.createElement("option");
-                option.value = name;
-                option.textContent = name;
-                celebrityDropdown.appendChild(option);
-            });
-        })
-        .catch(error => console.error("Error loading celebrity list:", error));
+    // Update text input when dropdown selection changes
+    $("#celebrityDropdown").change(function () {
+        $("#celebrityName").val($(this).val());
+    });
 
-    // Handle search
-    submitBtn.addEventListener("click", () => {
-        const name = celebrityNameInput.value.trim() || celebrityDropdown.value;
+    // Handle form submission
+    $("#submitBtn").click(function () {
+        let name = $("#celebrityName").val().trim();
 
         if (!name) {
-            resultsDiv.innerHTML = `<p class="text-danger">Please enter or select a celebrity.</p>`;
+            alert("Please enter or select a celebrity name.");
             return;
         }
 
-        fetch(`/api/celebrities/search?name=${encodeURIComponent(name)}`)
-            .then(response => response.json())
-            .then(data => {
-                resultsDiv.innerHTML = `
-                    <div class="card">
-                        <img src="${data.image}" class="card-img-top" alt="${data.name}">
-                        <div class="card-body">
-                            <h5 class="card-title">${data.name}</h5>
-                            <p class="card-text">${data.bio}</p>
-                        </div>
-                    </div>
-                `;
-            })
-            .catch(() => {
-                resultsDiv.innerHTML = `<p class="text-danger">Celebrity not found.</p>`;
-            });
+        // Fetch celebrity details
+        $.get(`/celebrities/search?name=${encodeURIComponent(name)}`, function (data) {
+            $("#results").html(`
+                <h3>${data.name}</h3>
+                <img src="${data.image}" alt="${data.name}" width="150">
+                <p>${data.bio}</p>
+            `);
+        }).fail(function () {
+            $("#results").html(`<p style="color: red;">Celebrity not found!</p>`);
+        });
     });
 });
